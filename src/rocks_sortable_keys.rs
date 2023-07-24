@@ -21,19 +21,24 @@ pub enum SortType {
     Descending
 }
 
+#[derive(Debug)]
+#[derive(Clone, Copy)]
 pub struct SortableF32 {
     value: f32
 }
 
+#[derive(Debug)]
+#[derive(Clone, Copy)]
 pub struct SortableF64 {
     value: f64
 }
 
-pub trait SortableKey {
+// make trait derive debug
+pub trait SortableKey:Clone +  PartialEq + Eq + PartialOrd + Ord + Sized + std::fmt::Debug {
     fn sort_type() -> SortType;
     fn encode(&self) -> Vec<u8>;
     fn decode(str:&[u8]) -> Self;
-    fn size(str:&[u8], pos:usize) -> usize; 
+    fn size(str:&[u8], pos:usize) -> u32; 
 }
 
 impl SortableKey for u16 {
@@ -49,7 +54,7 @@ impl SortableKey for u16 {
         u16::from_be_bytes(buf)
     }
 
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         2
     }
 }
@@ -67,7 +72,7 @@ impl SortableKey for bool {
     }
     fn decode(bytes: &[u8]) -> Self {
         bytes[0] == 1 }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         1
     }
 }
@@ -87,7 +92,7 @@ impl SortableKey for SortableF32 {
             value: f32::from_be_bytes(buf)
         }
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         4
     }
 }
@@ -106,7 +111,7 @@ impl SortableKey for SortableF64 {
             value: f64::from_be_bytes(buf)
         }
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         8
     }
 }
@@ -123,7 +128,7 @@ impl SortableKey for u32 {
         buf.copy_from_slice(bytes);
         u32::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         4
     }
 }
@@ -140,7 +145,7 @@ impl SortableKey for u64 {
         buf.copy_from_slice(bytes);
         u64::from_be_bytes(buf)
     }
-    fn size(__bytes: &[u8], _pos:usize) -> usize {
+    fn size(__bytes: &[u8], _pos:usize) -> u32 {
         8
     }
 }
@@ -157,7 +162,7 @@ impl SortableKey for u128 {
         buf.copy_from_slice(bytes);
         u128::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         16
     }
 }
@@ -174,7 +179,7 @@ impl SortableKey for i16 {
         buf.copy_from_slice(bytes);
         i16::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         2
     }
 }
@@ -191,7 +196,7 @@ impl SortableKey for i32 {
         buf.copy_from_slice(bytes);
         i32::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         4
     }
 }
@@ -208,7 +213,7 @@ impl SortableKey for i64 {
         buf.copy_from_slice(bytes);
         i64::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         8
     }
 }
@@ -225,7 +230,7 @@ impl SortableKey for i128 {
         buf.copy_from_slice(bytes);
         i128::from_be_bytes(buf)
     }
-    fn size(_bytes: &[u8], _pos:usize) -> usize {
+    fn size(_bytes: &[u8], _pos:usize) -> u32 {
         16
     }
 }
@@ -236,7 +241,8 @@ impl SortableKey for String {
     }
     fn encode(&self) -> Vec<u8> {
          let s = self.as_bytes().to_vec();
-         [s.len().to_be_bytes().to_vec(), s].concat()
+         let ls = s.len() as u32;
+         [ls.to_be_bytes().to_vec(), s].concat()
     }
     fn decode(bytes: &[u8]) -> Self {
         let len = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as usize;
@@ -244,8 +250,8 @@ impl SortableKey for String {
         String::from_utf8(bytes_rest.to_vec()).unwrap()
     }
 
-    fn size(str:&[u8], pos:usize) -> usize {
-        let len = u32::from_be_bytes([str[pos], str[pos+1], str[pos+2], str[pos+3]]) as usize;
+    fn size(str:&[u8], pos:usize) -> u32 {
+        let len = u32::from_be_bytes([str[pos], str[pos+1], str[pos+2], str[pos+3]]) as u32;
         len + 4
     }
    
@@ -264,8 +270,8 @@ impl SortableKey for Vec<u8> {
         let bytes_rest = &bytes[4..4+len];
         bytes_rest.to_vec()
     }
-    fn size(bytes: &[u8], pos:usize) -> usize {
-        let len = u32::from_be_bytes([bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]]) as usize;
+    fn size(bytes: &[u8], pos:usize) -> u32 {
+        let len = u32::from_be_bytes([bytes[pos], bytes[pos+1], bytes[pos+2], bytes[pos+3]]) as u32;
         len + 4
     }
 }
@@ -334,5 +340,64 @@ impl Ord for SortableF64 {
     }
 }
 
+fn get_sortable_keys<T: SortableKey>(bytes: &[u8]) -> Vec<Box<T>> {
+    let mut sortable_keys = Vec::new();
+    let mut pos = 0;
+    while pos < bytes.len() {
+        let size = T::size(bytes, pos) as usize;
+        let sortable_key = T::decode(&bytes[pos..pos + size]);
+        sortable_keys.push(Box::new(sortable_key));
+        pos += size;
+    }
+    sortable_keys
+}
+
+fn get_the_bytes<T:SortableKey>(sortable_keys: &Vec<Box<T>>) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    for sortable_key in sortable_keys {
+        bytes.extend(sortable_key.encode());
+    }
+    bytes
+}
+
+// create a test which tests get_bytes and get_sortable_keys
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+// create a function which tests that get_sortable_keys and get_the_bytes gives same result
+fn test_get_bytes<T:SortableKey>(sortable_keys: &Vec<Box<T>>) {
+    let bytes = get_the_bytes(sortable_keys);
+    let sortable_keys2 = get_sortable_keys(&bytes);
+    assert_eq!(sortable_keys, &sortable_keys2);
+}
+
+    #[test]
+    fn test_get_bytes_i32() {
+        let sortable_keys = vec![Box::new(1i32), Box::new(2i32), Box::new(3i32)];
+        test_get_bytes(&sortable_keys);
+    }
+
+    #[test]
+    fn test_get_bytes_i64() {
+        let sortable_keys = vec![Box::new(1i64), Box::new(2i64), Box::new(3i64)];
+        test_get_bytes(&sortable_keys);
+    }
+
+    #[test]
+    fn test_get_bytes_i128() {
+        let sortable_keys = vec![Box::new(1i128), Box::new(2i128), Box::new(3i128)];
+        test_get_bytes(&sortable_keys);
+    }
+
+    #[test]
+    fn test_get_bytes_string() {
+        let sortable_keys = vec![Box::new("a".to_string()), Box::new("b".to_string()), Box::new("c".to_string())];
+        // debug print the bytes
+        let bytes = get_the_bytes(&sortable_keys);
+        println!("{:?}", bytes);
+        test_get_bytes(&sortable_keys);
+    }
 
 
+}
