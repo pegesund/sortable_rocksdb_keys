@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-// use std::cmp::Ordering;
+use std::cmp::Ordering;
 // use enum_dispatch::enum_dispatch;
 
 // #[enum_dispatch]
@@ -265,6 +265,169 @@ fn decode_byte_array<T: Decode>(data: &[u8], the_types: &Vec<DecodeType>) -> Vec
     decoded_data
 }
 
+
+fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeType]) -> Ordering {
+    let mut pos = 0;
+    let mut is_reverse = false;
+    for the_type in the_types {
+        if the_type == &DecodeType::Reverse {
+            is_reverse = true;
+            continue;
+        }
+        let result = match the_type {
+            DecodeType::DecodeU8 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortU8(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortU8(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeU16 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortU16(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortU16(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeU32 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortU32(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortU32(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeU64 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortU64(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortU64(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeU128 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortU128(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortU128(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeString => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortString(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortString(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeBool => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortBool(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortBool(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeF32 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortF32(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortF32(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            DecodeType::DecodeF64 => {
+                let key1_value = match &key1[pos] {
+                    EncodeType::SortF64(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                let key2_value = match &key2[pos] {
+                    EncodeType::SortF64(value) => value,
+                    _ => panic!("wrong type"),
+                };
+                if is_reverse {
+                    key2_value.cmp(key1_value)
+                } else {
+                    key1_value.cmp(key2_value)
+                }
+            },
+            _ => panic!("wrong type"),
+        };
+        if result != Ordering::Equal {
+            return result;
+        }
+        pos += 1;
+        is_reverse = false;
+    }
+    Ordering::Equal
+}
+
+
+fn compare_bytes(the_types: &Vec<DecodeType>, key1: &[u8], key2: &[u8]) -> Ordering {
+    let decoded_key1 = decode_byte_array::<DecodeType>(key1, the_types);
+    let decoded_key2 = decode_byte_array::<DecodeType>(key2, the_types);
+    compare(the_types, &decoded_key1, &decoded_key2)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -295,5 +458,70 @@ mod tests {
         assert_eq!(keys, decoded_data);
     }
 
+    #[test]
+    fn test_compare() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(3)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Less);
+    }
+    
+    #[test]
+    fn test_compare_reverse() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(3)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::Reverse, DecodeType::DecodeU32];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Greater);
+    }
+
+    #[test]
+    fn test_compare_string() {
+        let key1 = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
+        let key2 = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(3.0))];
+        let the_types = vec![DecodeType::DecodeString, DecodeType::DecodeF32, DecodeType::DecodeF64];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Less);
+    }
+    
+    #[test]
+    fn test_compare_string_reverse() {
+        let key1 = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
+        let key2 = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(3.0))];
+        let the_types = vec![DecodeType::DecodeString, DecodeType::DecodeF32, DecodeType::Reverse, DecodeType::DecodeF64];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Greater);
+    }
+
+    #[test]
+    fn test_compare_gives_equal() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Equal);
+    }
+
+    #[test]
+    fn test_compare_gives_equal_reverse() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::Reverse, DecodeType::DecodeU32];
+        let result = compare(&the_types, &key1, &key2);
+        assert_eq!(result, Ordering::Equal);
+    }
+
+    #[test]
+    // create a function which test the compare_bytes function above
+    fn test_compare_bytes_function() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(3)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32];
+        let encoded_key1 = encode_keys(&key1);
+        let encoded_key2 = encode_keys(&key2);
+        let result = compare_bytes(&the_types, &encoded_key1, &encoded_key2);
+        assert_eq!(result, Ordering::Less);
+    }
 }
 
