@@ -17,8 +17,6 @@ pub struct F64struct {
     value: f64
 }   
 
-
-// create a function to compare to f32 values
 fn compare_f32(a: &f32, b: &f32) -> std::cmp::Ordering {
     if a.is_nan() && b.is_nan() {
         std::cmp::Ordering::Equal
@@ -31,7 +29,6 @@ fn compare_f32(a: &f32, b: &f32) -> std::cmp::Ordering {
     }
 }
 
-// create a function to compare to f64 values
 fn compare_f64(a: &f64, b: &f64) -> std::cmp::Ordering {
     if a.is_nan() && b.is_nan() {
         std::cmp::Ordering::Equal
@@ -275,10 +272,8 @@ mod tests {
     fn test_encode_and_decode() {
         let keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
         let encoded_data = encode_keys(&keys);
-        println!("encoded_data: {:?}", encoded_data);
         let the_types = vec![DecodeType::DecodeU16, DecodeType::Reverse, DecodeType::DecodeU32];
         let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
-        println!("decoded_data: {:?}", decoded_data);
         assert_eq!(keys, decoded_data);
     }
 
@@ -286,10 +281,8 @@ mod tests {
     fn test_encode_and_decode_string_and_floats() {
         let keys = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
         let encoded_data = encode_keys(&keys);
-        println!("encoded_data: {:?}", encoded_data);
         let the_types = vec![DecodeType::DecodeString, DecodeType::DecodeF32, DecodeType::DecodeF64];
         let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
-        println!("decoded_data: {:?}", decoded_data);
         assert_eq!(keys, decoded_data);
     }
 
@@ -297,10 +290,8 @@ mod tests {
     fn test_encode_and_decode_for_all_types() {
         let keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2), EncodeType::SortU64(3), EncodeType::SortU128(4), EncodeType::SortI32(5), EncodeType::SortI64(6), EncodeType::SortString("hello".to_string()), EncodeType::SortBytes(vec![1, 2, 3]), EncodeType::SortBool(true), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
         let encoded_data = encode_keys(&keys);
-        println!("encoded_data: {:?}", encoded_data);
-        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::Reverse, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
         let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
-        println!("decoded_data: {:?}", decoded_data);
         assert_eq!(keys, decoded_data);
     }
 
