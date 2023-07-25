@@ -156,7 +156,7 @@ impl Decode for DecodeType {
     }
 } 
 
-fn encode_keys<T: Encode>(keys: &[T]) -> Vec<u8> {
+pub fn encode_keys<T: Encode>(keys: &[T]) -> Vec<u8> {
     let mut encoded_data = Vec::new();
 
     for key in keys {
@@ -165,7 +165,7 @@ fn encode_keys<T: Encode>(keys: &[T]) -> Vec<u8> {
     encoded_data
 }
 
-fn decode_byte_array<T: Decode>(data: &[u8], the_types: &Vec<DecodeType>) -> Vec<EncodeType> {
+pub fn decode_byte_array(data: &[u8], the_types: &Vec<DecodeType>) -> Vec<EncodeType> {
     let mut pos = 0;
     let mut decoded_data = Vec::new();
 
@@ -173,13 +173,13 @@ fn decode_byte_array<T: Decode>(data: &[u8], the_types: &Vec<DecodeType>) -> Vec
         if the_type == &DecodeType::Reverse {
             continue;
         }
-        decoded_data.push(T::decode(data, the_type.clone(), &mut pos));
+        decoded_data.push(DecodeType::decode(data, the_type.clone(), &mut pos));
     }
     decoded_data
 }
 
 
-fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeType]) -> Ordering {
+pub fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeType]) -> Ordering {
     let mut pos = 0;
     let mut is_reverse = false;
     for the_type in the_types {
@@ -335,9 +335,9 @@ fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeType]
 }
 
 
-fn compare_bytes(the_types: &Vec<DecodeType>, key1: &[u8], key2: &[u8]) -> Ordering {
-    let decoded_key1 = decode_byte_array::<DecodeType>(key1, the_types);
-    let decoded_key2 = decode_byte_array::<DecodeType>(key2, the_types);
+pub fn compare_bytes(the_types: &Vec<DecodeType>, key1: &[u8], key2: &[u8]) -> Ordering {
+    let decoded_key1 = decode_byte_array(key1, the_types);
+    let decoded_key2 = decode_byte_array(key2, the_types);
     compare(the_types, &decoded_key1, &decoded_key2)
 }
 
@@ -349,7 +349,7 @@ mod tests {
         let keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
         let encoded_data = encode_keys(&keys);
         let the_types = vec![DecodeType::DecodeU16, DecodeType::Reverse, DecodeType::DecodeU32];
-        let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
+        let decoded_data = decode_byte_array(&encoded_data, &the_types);
         assert_eq!(keys, decoded_data);
     }
 
@@ -358,7 +358,7 @@ mod tests {
         let keys = vec![EncodeType::SortString("hello".to_string()), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
         let encoded_data = encode_keys(&keys);
         let the_types = vec![DecodeType::DecodeString, DecodeType::DecodeF32, DecodeType::DecodeF64];
-        let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
+        let decoded_data = decode_byte_array(&encoded_data, &the_types);
         assert_eq!(keys, decoded_data);
     }
 
@@ -367,7 +367,7 @@ mod tests {
         let keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2), EncodeType::SortU64(3), EncodeType::SortU128(4), EncodeType::SortI32(5), EncodeType::SortI64(6), EncodeType::SortString("hello".to_string()), EncodeType::SortBytes(vec![1, 2, 3]), EncodeType::SortBool(true), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
         let encoded_data = encode_keys(&keys);
         let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::Reverse, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
-        let decoded_data = decode_byte_array::<DecodeType>(&encoded_data, &the_types);
+        let decoded_data = decode_byte_array(&encoded_data, &the_types);
         assert_eq!(keys, decoded_data);
     }
 
