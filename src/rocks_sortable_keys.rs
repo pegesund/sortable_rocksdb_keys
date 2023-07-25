@@ -523,5 +523,16 @@ mod tests {
         let result = compare_bytes(&the_types, &encoded_key1, &encoded_key2);
         assert_eq!(result, Ordering::Less);
     }
+
+    #[test]
+    fn test_compare_bytes_function_reverse() {
+        let key1 = vec![EncodeType::SortU16(1), EncodeType::SortU32(2)];
+        let key2 = vec![EncodeType::SortU16(1), EncodeType::SortU32(3)];
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::Reverse, DecodeType::DecodeU32];
+        let encoded_key1 = encode_keys(&key1);
+        let encoded_key2 = encode_keys(&key2);
+        let result = compare_bytes(&the_types, &encoded_key1, &encoded_key2);
+        assert_eq!(result, Ordering::Greater);
+    }
 }
 
