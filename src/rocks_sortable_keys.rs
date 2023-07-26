@@ -341,6 +341,51 @@ pub fn compare_bytes(the_types: &Vec<DecodeType>, key1: &[u8], key2: &[u8]) -> O
     compare(the_types, &decoded_key1, &decoded_key2)
 }
 
+pub fn serialize_decode_types(the_types:&Vec<DecodeType>) -> Vec<u8> {
+    let mut result = Vec::new();
+    for the_type in the_types {
+        match the_type {
+            DecodeType::DecodeU8 => result.push(0),
+            DecodeType::DecodeU16 => result.push(1),
+            DecodeType::DecodeU32 => result.push(2),
+            DecodeType::DecodeU64 => result.push(3),
+            DecodeType::DecodeU128 => result.push(4),
+            DecodeType::DecodeString => result.push(5),
+            DecodeType::DecodeBool => result.push(6),
+            DecodeType::DecodeF32 => result.push(7),
+            DecodeType::DecodeF64 => result.push(8),
+            DecodeType::Reverse => result.push(9),
+            DecodeType::DecodeBytes => result.push(10),
+            DecodeType::DecodeI32 => result.push(11),
+            DecodeType::DecodeI64 => result.push(12),
+        }
+    }
+    result
+}
+
+pub fn deserialize_decode_types(the_types:&Vec<u8>) -> Vec<DecodeType> {
+    let mut result = Vec::new();
+    for the_type in the_types {
+        match the_type {
+            0 => result.push(DecodeType::DecodeU8),
+            1 => result.push(DecodeType::DecodeU16),
+            2 => result.push(DecodeType::DecodeU32),
+            3 => result.push(DecodeType::DecodeU64),
+            4 => result.push(DecodeType::DecodeU128),
+            5 => result.push(DecodeType::DecodeString),
+            6 => result.push(DecodeType::DecodeBool),
+            7 => result.push(DecodeType::DecodeF32),
+            8 => result.push(DecodeType::DecodeF64),
+            9 => result.push(DecodeType::Reverse),
+            10 => result.push(DecodeType::DecodeBytes),
+            11 => result.push(DecodeType::DecodeI32),
+            12 => result.push(DecodeType::DecodeI64),
+            _ => panic!("wrong type"),
+        }
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -446,6 +491,15 @@ mod tests {
         let encoded_key2 = encode_keys(&key2);
         let result = compare_bytes(&the_types, &encoded_key1, &encoded_key2);
         assert_eq!(result, Ordering::Greater);
+    }
+
+    #[test]
+    // write a function which test deserialize_decode_types
+    fn test_deserialize_decode_types() {
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::Reverse, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
+        let serliazed_types = serialize_decode_types(&the_types);
+        let decoded_types = deserialize_decode_types(&serliazed_types);
+        assert_eq!(the_types, decoded_types);
     }
 }
 
