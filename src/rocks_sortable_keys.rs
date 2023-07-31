@@ -48,6 +48,7 @@ pub trait Decode: std::fmt::Debug + Clone {
 
 impl Encode for EncodeType {
 
+#[inline]
     fn encode(&self) -> Vec<u8> {
         match self {
             EncodeType::SortU8(value) => value.to_be_bytes().to_vec(),
@@ -80,6 +81,7 @@ impl Encode for EncodeType {
 
 impl Decode for DecodeType {
 
+#[inline]
     fn decode(data: &[u8], the_type: DecodeType, pos: &mut usize) -> EncodeType {
         match the_type {
             DecodeType::DecodeU8 => {
@@ -156,6 +158,7 @@ impl Decode for DecodeType {
     }
 } 
 
+#[inline]
 pub fn encode_keys<T: Encode>(keys: &[T]) -> Vec<u8> {
     let mut encoded_data = Vec::new();
 
@@ -165,6 +168,7 @@ pub fn encode_keys<T: Encode>(keys: &[T]) -> Vec<u8> {
     encoded_data
 }
 
+#[inline]
 pub fn decode_byte_array(data: &[u8], the_types: &Vec<DecodeType>) -> Vec<EncodeType> {
     let mut pos = 0;
     let mut decoded_data = Vec::new();
@@ -179,6 +183,7 @@ pub fn decode_byte_array(data: &[u8], the_types: &Vec<DecodeType>) -> Vec<Encode
 }
 
 
+#[inline]
 pub fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeType]) -> Ordering {
     let mut pos = 0;
     let mut is_reverse = false;
@@ -333,13 +338,13 @@ pub fn compare(the_types: &Vec<DecodeType>, key1: &[EncodeType], key2: &[EncodeT
     }
     Ordering::Equal
 }
-
-
+#[inline]
 pub fn compare_bytes(the_types: &Vec<DecodeType>, key1: &[u8], key2: &[u8]) -> Ordering {
     let decoded_key1 = decode_byte_array(key1, the_types);
     let decoded_key2 = decode_byte_array(key2, the_types);
     compare(the_types, &decoded_key1, &decoded_key2)
 }
+
 
 pub fn serialize_decode_types(the_types:&Vec<DecodeType>) -> Vec<u8> {
     let mut result = Vec::new();
