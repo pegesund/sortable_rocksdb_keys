@@ -20,7 +20,7 @@ mod tests {
         let db = DB::open(&db_opts, path).unwrap();
         // create a byte string that is a compound key, the first part is a string, the second part is a reverse u32 (meaning that the sort order is reversed on the last argument)
         let key1 = vec![EncodeType::SortString("a".to_string()), EncodeType::SortU32(0)];
-        let key2 = vec![EncodeType::SortString("a".to_string()), EncodeType::SortU32(1)];
+        let key2 = vec![EncodeType::SortString("a".to_string()), EncodeType::SortU32(1)]; // this one should be at top
         let key3 = vec![EncodeType::SortString("b".to_string()), EncodeType::SortU32(0)];
         let encoded_key1 = encode_keys(&key1);
         let encoded_key2 = encode_keys(&key2);
@@ -40,7 +40,7 @@ mod tests {
         }
     }
     let _ = DB::destroy(&Options::default(), path);
-    // assure that key2 comes before key1, and key1 comes before key3
+    // assure that key2 comes before key1, and key3 is last
     assert_eq!(result_vec, vec!["key2", "key1", "key3"]);
     }
 }

@@ -391,6 +391,79 @@ pub fn deserialize_decode_types(the_types:&Vec<u8>) -> Vec<DecodeType> {
     result
 }
 
+
+fn validate_types(decode_types_all: &[DecodeType], encode_types: &[EncodeType]) -> bool {
+    let decode_types: Vec<DecodeType> = decode_types_all.iter().filter(|x| **x != DecodeType::Reverse).cloned().collect();
+    if encode_types.len() != decode_types.len() {
+        return false;
+    }
+    for (encode_type, decode_type) in encode_types.iter().zip(decode_types.iter()) {
+        match encode_type {
+            EncodeType::SortU8(_) => {
+                if *decode_type != DecodeType::DecodeU8 {
+                    return false;
+                }
+            },
+            EncodeType::SortU16(_) => {
+                if *decode_type != DecodeType::DecodeU16 {
+                    return false;
+                }
+            },
+            EncodeType::SortU32(_) => {
+                if *decode_type != DecodeType::DecodeU32 {
+                    return false;
+                }
+            },
+            EncodeType::SortU64(_) => {
+                if *decode_type != DecodeType::DecodeU64 {
+                    return false;
+                }
+            },
+            EncodeType::SortU128(_) => {
+                if *decode_type != DecodeType::DecodeU128 {
+                    return false;
+                }
+            },
+            EncodeType::SortString(_) => {
+                if *decode_type != DecodeType::DecodeString {
+                    return false;
+                }
+            },
+            EncodeType::SortBool(_) => {
+                if *decode_type != DecodeType::DecodeBool {
+                    return false;
+                }
+            },
+            EncodeType::SortF32(_) => {
+                if *decode_type != DecodeType::DecodeF32 {
+                    return false;
+                }
+            },
+            EncodeType::SortF64(_) => {
+                if *decode_type != DecodeType::DecodeF64 {
+                    return false;
+                }
+            },
+            EncodeType::SortBytes(_) => {
+                if *decode_type != DecodeType::DecodeBytes {
+                    return false;
+                }
+            },
+            EncodeType::SortI32(_) => {
+                if *decode_type != DecodeType::DecodeI32 {
+                    return false;
+                }
+            },
+            EncodeType::SortI64(_) => {
+                if *decode_type != DecodeType::DecodeI64 {
+                    return false;
+                }
+            },
+        }
+    }
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -505,6 +578,23 @@ mod tests {
         let serliazed_types = serialize_decode_types(&the_types);
         let decoded_types = deserialize_decode_types(&serliazed_types);
         assert_eq!(the_types, decoded_types);
+    }
+
+    // write a test for the validate_types function above
+    #[test]
+    fn test_validate_types() {
+        let the_types = vec![DecodeType::DecodeU16, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::Reverse, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
+        let the_keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2), EncodeType::SortU64(3), EncodeType::SortU128(4), EncodeType::SortI32(5), EncodeType::SortI64(6), EncodeType::SortString("hello".to_string()), EncodeType::SortBytes(b"hello".to_vec()), EncodeType::SortBool(true), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
+        let result = validate_types(&the_types, &the_keys);
+        assert!(result);
+    }
+
+    #[test]
+    fn test_validate_types_fail() {
+        let the_types = vec![DecodeType::DecodeU32, DecodeType::DecodeU32, DecodeType::DecodeU64, DecodeType::Reverse, DecodeType::DecodeU128, DecodeType::DecodeI32, DecodeType::DecodeI64, DecodeType::DecodeString, DecodeType::DecodeBytes, DecodeType::DecodeBool, DecodeType::DecodeF32, DecodeType::DecodeF64];
+        let the_keys = vec![EncodeType::SortU16(1), EncodeType::SortU32(2), EncodeType::SortU64(3), EncodeType::SortU128(4), EncodeType::SortI32(5), EncodeType::SortI64(6), EncodeType::SortString("hello".to_string()), EncodeType::SortBytes(b"hello".to_vec()), EncodeType::SortBool(true), EncodeType::SortF32(F32struct::new(1.0)), EncodeType::SortF64(F64struct::new(2.0))];
+        let result = validate_types(&the_types, &the_keys);
+        assert!(!result);
     }
 }
 
