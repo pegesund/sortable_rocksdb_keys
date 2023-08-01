@@ -1,5 +1,5 @@
 [package]
-name = "rocks_sortable_keys"
+name = "sortable_rocksdb_keys"
 version = "0.1.0"
 edition = "2021"
 
