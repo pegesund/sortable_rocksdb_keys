@@ -1,11 +1,11 @@
-use rocksdb::{Options, DB};
-use std::iter::FromIterator;
-use crate::rocks_sortable_keys::*;
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rocksdb::{Options, DB};
+    use std::iter::FromIterator;
+    use crate::rocks_sortable_keys::*;
     #[test]
     fn test_compound_comparator() {
     let mut result_vec = Vec::new();
